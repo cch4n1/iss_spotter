@@ -1,6 +1,5 @@
-const { nextISSTimesForMyLocation, printPassTimes } = require('./iss');
-
-
+const { nextISSTimesForMyLocation } = require('./iss');
+const { printPassTimes } = require('./print_passtimes');
 
 nextISSTimesForMyLocation((error, passTimes) => {
   if (error) {
