@@ -44,4 +44,44 @@ const fetchCoordsByIP = function(ip, callback) {
   });
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP };
+// fetches iss flyover times from JSON API
+const fetchISSFlyOverTimes = function(coords, callback) {
+  request(`https://iss-flyover.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`, function(error, response, body) {
+    if (error) {  // check for connection error
+      return callback(error, null);
+    }
+    // if non-200 status, assume server error
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching ISS flyover times. Response: ${body}`;
+      return callback(Error(msg), null);
+    }
+    const flyover = JSON.parse(body).response;
+    return callback(null, flyover);  // return ip address to callback
+  });
+};
+
+const nextISSTimesForMyLocation = function(callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    }
+
+    fetchCoordsByIP(ip, (error, gps) => {
+      if (error) {
+        return callback(error, null);
+      }
+
+      fetchISSFlyOverTimes(gps, (error, passTimes) => {
+        if (error) {
+          return callback(error, null);
+        }
+  
+        callback(null, passTimes);
+      });
+    });
+  });
+}
+
+
+
+module.exports = { nextISSTimesForMyLocation };
